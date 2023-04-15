@@ -16,6 +16,8 @@ library DataTypes {
     }
 
     struct SubwalletParams {
+        /// @notice original owner
+        address owner;
         /// @notice account followed by this subwallet
         address target;
         /// @notice Amount of ETH to transfer to the subwallet
