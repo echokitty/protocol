@@ -16,12 +16,8 @@ library DataTypes {
     }
 
     struct SubwalletParams {
-        /// @notice original owner
-        address owner;
         /// @notice account followed by this subwallet
         address target;
-        /// @notice Amount of ETH to transfer to the subwallet
-        uint256 amount;
         /// @notice List of initial swaps to do within the subwallet
         /// this will be used to initially swap funds
         DataTypes.RawSwap[] swaps;
