@@ -36,7 +36,10 @@ contract SmartWalletTest is Test {
         DataTypes.SubwalletParams memory params;
         params.target = nava;
         vm.prank(ley);
-        ISubWallet newSubwallet = smartwallet.createSubwallet{value: 4}(params);
+        ISubWallet newSubwallet = smartwallet.createSubwallet{value: 4}(
+            bytes32("a"),
+            params
+        );
         assertEq(address(newSubwallet.parentWallet()), address(smartwallet));
         assertEq(newSubwallet.target(), nava);
         assertEq(address(newSubwallet).balance, 4);
@@ -47,14 +50,20 @@ contract SmartWalletTest is Test {
         params.target = nava;
         vm.prank(ley);
         ISubWallet firstSubwallet = smartwallet.createSubwallet{value: 4 ether}(
+            bytes32("a"),
             params
         );
 
         params.target = bob;
+        address predictedAddress = smartwallet.getPredictedSubwalletAddress(
+            bytes32("b"),
+            params.target
+        );
         vm.prank(ley);
         ISubWallet secondSubwallet = smartwallet.createSubwallet{
             value: 4 ether
-        }(params);
+        }(bytes32("b"), params);
+        assertEq(address(secondSubwallet), predictedAddress);
 
         assertEq(smartwallet.listSubwallets().length, 2);
         assertEq(firstSubwallet.target(), nava);

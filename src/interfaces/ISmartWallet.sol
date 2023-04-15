@@ -17,8 +17,14 @@ interface ISmartWallet {
         returns (IAuthorizationRegistry);
 
     function createSubwallet(
+        bytes32 salt,
         DataTypes.SubwalletParams calldata params
     ) external payable returns (ISubWallet);
+
+    function getPredictedSubwalletAddress(
+        bytes32 salt,
+        address target
+    ) external view returns (address);
 
     function listSubwallets() external view returns (address[] memory);
 

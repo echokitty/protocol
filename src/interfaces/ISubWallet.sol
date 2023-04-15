@@ -12,6 +12,8 @@ interface ISubWallet {
 
     function createdAt() external view returns (uint256);
 
+    function initialValue() external view returns (uint256);
+
     function tearDown(DataTypes.RawSwap[] memory swaps) external;
 
     /// @return a list of tokens that are currently in the subwallet

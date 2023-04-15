@@ -30,10 +30,32 @@ contract SmartWallet is ISmartWallet {
         authorizationRegistry.authorize(manager);
     }
 
+    function getPredictedSubwalletAddress(
+        bytes32 salt,
+        address target
+    ) external view returns (address) {
+        bytes32 hashedDeployment = keccak256(
+            abi.encodePacked(type(SubWallet).creationCode, abi.encode(target))
+        );
+        bytes32 finalHash = keccak256(
+            abi.encodePacked(
+                bytes1(0xff),
+                address(this),
+                salt,
+                hashedDeployment
+            )
+        );
+        return address(uint160(uint256(finalHash)));
+    }
+
     function createSubwallet(
+        bytes32 salt,
         DataTypes.SubwalletParams calldata params
     ) external payable onlyOwner returns (ISubWallet) {
-        SubWallet subwallet = new SubWallet{value: msg.value}(params);
+        SubWallet subwallet = new SubWallet{value: msg.value, salt: salt}(
+            params.target
+        );
+        subwallet.initializeWallet(params.swaps);
         _subwallets.add(address(subwallet));
         emit SubwalletCreated(address(subwallet), msg.sender);
         return subwallet;
