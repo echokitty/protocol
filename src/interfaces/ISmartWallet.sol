@@ -11,5 +11,6 @@ interface ISmartWallet {
         DataTypes.SubwalletParams calldata params
     ) external returns (ISubWallet);
 
+
     function listSubwallets() external view returns (ISubWallet[] memory);
 }
