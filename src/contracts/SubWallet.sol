@@ -12,6 +12,7 @@ import "../interfaces/ISmartWallet.sol";
 contract SubWallet is ISubWallet {
     using EnumerableSet for EnumerableSet.AddressSet;
     using Address for address;
+    using Address for address payable;
 
     uint256 public immutable createdAt;
     ISmartWallet public parentWallet;
@@ -36,6 +37,15 @@ contract SubWallet is ISubWallet {
             "not authorized to swap"
         );
         _executeSwap(swap);
+    }
+
+    function tearDown(DataTypes.RawSwap[] memory swaps) external {
+        require(
+            msg.sender == address(parentWallet),
+            "not authorized to tear down"
+        );
+        _executeSwaps(swaps);
+        payable(address(parentWallet)).sendValue(address(this).balance);
     }
 
     function _executeSwaps(DataTypes.RawSwap[] memory swaps) internal {

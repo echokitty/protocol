@@ -45,7 +45,6 @@ contract SmartWalletTest is Test {
     function testListSubwallets() public {
         DataTypes.SubwalletParams memory params;
         params.target = nava;
-        vm.deal(ley, 20 ether);
         vm.prank(ley);
         ISubWallet firstSubwallet = smartwallet.createSubwallet{value: 4 ether}(
             params

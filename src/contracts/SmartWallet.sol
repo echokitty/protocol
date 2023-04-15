@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 import "../libraries/Datatypes.sol";
 import "../interfaces/ISmartWallet.sol";
 import "../interfaces/IAuthorizationRegistry.sol";
 import "./SubWallet.sol";
 
 contract SmartWallet is ISmartWallet {
+    using EnumerableSet for EnumerableSet.AddressSet;
+
     address public owner;
     IAuthorizationRegistry public immutable authorizationRegistry;
-    ISubWallet[] public subwallets;
+    EnumerableSet.AddressSet internal _subwallets;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
@@ -30,8 +34,22 @@ contract SmartWallet is ISmartWallet {
         DataTypes.SubwalletParams calldata params
     ) external payable onlyOwner returns (ISubWallet) {
         SubWallet subwallet = new SubWallet{value: msg.value}(params);
-        subwallets.push(subwallet);
+        _subwallets.add(address(subwallet));
+        emit SubwalletCreated(address(subwallet), msg.sender);
         return subwallet;
+    }
+
+    function shutdownSubwallet(
+        address subwallet,
+        DataTypes.RawSwap[] calldata swaps
+    ) external onlyOwner {
+        require(
+            _subwallets.contains(subwallet),
+            "Subwallet does not exist for this wallet"
+        );
+        ISubWallet(subwallet).tearDown(swaps);
+        _subwallets.remove(subwallet);
+        emit SubwalletShutdown(subwallet);
     }
 
     function isAuthorized(address manager) external view returns (bool) {
@@ -42,7 +60,7 @@ contract SmartWallet is ISmartWallet {
         authorizationRegistry.authorize(newManager);
     }
 
-    function listSubwallets() external view returns (ISubWallet[] memory) {
-        return subwallets;
+    function listSubwallets() external view returns (address[] memory) {
+        return _subwallets.values();
     }
 }
