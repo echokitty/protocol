@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/erc20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 import "../libraries/Datatypes.sol";
@@ -73,6 +74,11 @@ contract SubWallet is ISubWallet, Initializable {
             swap.call.value,
             "swap failed"
         );
-        _tokens.add(swap.outputToken);
+        if (_tokens.add(swap.outputToken)) {
+            IERC20(swap.outputToken).approve(
+                swap.call.target,
+                type(uint256).max
+            );
+        }
     }
 }
